@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.8/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-sRIl4kxILFvY47J16cr9ZwB07vP4J8+LH7qKQnuqkuIAvNWLzeN8tE5YBujZqJLB" crossorigin="anonymous">
+<link rel="stylesheet" href="/style.css">
+    <title>Home</title>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+  <div class="container-fluid">
+    
+    <!-- Logo -->
+    <a class="navbar-brand fw-bold">CampusSync</a>
+
+    <!-- Toggle button (mobile) -->
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+      <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <!-- Links -->
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ms-auto">
+
+
+        <li class="nav-item">
+          <a class="nav-link active" href="/discussion">Discussion</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-warning fw-bold" href="/marketplace">Buy Item</a>
+        </li>
+
+        <li class="nav-item">
+          <a class="nav-link text-primary fw-bold" href="/profile">Profile</a>
+        </li>
+         <li class="nav-item">
+          <a class="btn btn-outline-danger ms-3" href="/logout">Logout</a>
+        </li>
+
+      </ul>
+    </div>
+
+  </div>
+</nav>
+<h2 class="m-3 text-center">Let's be  Updated!</h2>
+
+<% posts.forEach(post => { %>
+
+  <div class="card shadow-sm mb-3 p-3 rounded-3 mx-auto w-100" style="max-width: 800px;">
+    
+    <!-- 👤 Username + Category -->
+    <div class="d-flex justify-content-between align-items-center mb-2">
+      
+      <h6 class="mb-0 fw-semibold">@<%= post.user.username %></h6>
+
+      <span class="badge 
+        <%= post.category === 'internship' ? 'bg-success' : 
+            post.category === 'events' ? 'bg-warning text-dark' : 
+            'bg-primary' %>">
+        <%= post.category %>
+      </span>
+
+    </div>
+
+   
+    <p class="mb-1"><%= post.content %></p>
+
+   
+    <small class="text-muted">
+      <%= new Date(post.createdAt).toDateString() %>
+    </small>
+    <small><%=post.likes.length%> likes</small>
+   <a href="/like/<%= post._id %>" class="btn btn-primary me-2">
+<%= user && user.userid &&
+post.likes.some(id => id.toString() === user.userid.toString())
+? "Unlike" : "Like" %>
+</a>
+
+  </div>
+
+<% }) %>
+ 
+ 
+
+      
+</body>
+</html>
