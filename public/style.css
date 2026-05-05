@@ -42,3 +42,24 @@ body{
 .f-style{
     color: blue;
 }
+/* ADD THIS at the bottom of style.css */
+@media (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    height: auto;
+  }
+
+  .left {
+    padding: 30px 20px;
+  }
+
+  .right {
+    padding: 20px;
+    justify-content: center;
+  }
+
+  .form-box {
+    width: 100%;
+    height: auto;
+  }
+}
