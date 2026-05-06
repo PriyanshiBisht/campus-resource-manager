@@ -33,11 +33,11 @@
           <a class="nav-link text-warning fw-bold" href="/marketplace">Buy Item</a>
         </li>
 
-        <li class="nav-item">
-          <a class="nav-link text-primary fw-bold" href="/profile">Profile</a>
-        </li>
+      <li class="nav-item">
+  <a class="nav-link text-primary fw-bold" href="/profile">Profile</a>
+</li>
          <li class="nav-item">
-          <a class="btn btn-outline-danger ms-3" href="/logout">Logout</a>
+          <a class="btn btn-outline-danger ms-lg-3 mt-2 mt-lg-0" href="/logout">Logout</a>
         </li>
 
       </ul>
@@ -73,17 +73,21 @@
       <%= new Date(post.createdAt).toDateString() %>
     </small>
     <small><%=post.likes.length%> likes</small>
-   <a href="/like/<%= post._id %>" class="btn btn-primary me-2">
-<%= user && user.userid &&
-post.likes.some(id => id.toString() === user.userid.toString())
-? "Unlike" : "Like" %>
-</a>
+  <button onclick="handleLike(this, '<%= post._id %>')" class="btn btn-primary me-2">
+  <%= user && user.userid && post.likes.some(id => id.toString() === user.userid.toString()) ? "Unlike" : "Like" %>
+</button>
 
   </div>
 
 <% }) %>
  
- 
+ <script>
+  async function handleLike(btn, postId) {
+    const data = await fetch(`/like/${postId}`).then(r => r.json());
+    btn.textContent = data.liked ? "Unlike" : "Like";
+    btn.previousElementSibling.textContent = data.likesCount + " likes";
+  }
+</script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>

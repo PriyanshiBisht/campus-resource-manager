@@ -64,7 +64,7 @@ else{
     post.likes.splice(post.likes.indexOf(req.user.userid),1);
 }
  await post.save(); 
-  res.redirect("/discussion");
+ res.json({ liked: post.likes.includes(req.user.userid), likesCount: post.likes.length });
 });
 app.get("/delete/:id", isLoggedIn, async (req, res) => {
   let post = await postModel.findById(req.params.id);
@@ -190,7 +190,8 @@ app.post("/sell", isLoggedIn, upload.single("image"), async (req, res) => {
   }
 });
 app.get("/marketplace", isLoggedIn, async (req, res) => {
-  const items = await itemModel.find().sort({ createdAt: -1 });
+  
+  const items = await itemModel.find().populate("user").sort({ createdAt: -1 });
   res.render("marketplace", { items });
 });
 function isLoggedIn(req, res, next) {
