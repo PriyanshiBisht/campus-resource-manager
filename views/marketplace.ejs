@@ -49,9 +49,16 @@
  
    <h2 class="mb-4 text-center">🛒 Find exactly what you need for Class</h2>
 <p class="mb-4 text-center"   >The community-driven marketplace for students to buy and sell textbooks,electronics and study materials at affordable prices</p>
-
+<form method="GET" action="/marketplace" class="d-flex justify-content-center mb-4">
+  <input type="text" name="search" value="<%= search %>" placeholder="Search items..." class="form-control w-50 px-3 me-2">
+  <button type="submit" class="btn btn-dark  px-4">Search</button>
+</form>
   <div class="row g-4">
-
+<% if(items.length === 0) { %>
+  <div class="text-center mt-5">
+    <p class="text-muted fs-5">No items found. Try a different search! 🔍</p>
+  </div>
+<% } %>
     <% items.forEach(item => { %>
 
       <div class="col-md-4 col-sm-6">
@@ -83,6 +90,10 @@
    class="btn btn-primary btn-sm mt-auto">
    Contact Seller
 </a>
+<% if (item.user && item.user._id.toString() === user._id.toString()) { %>
+  
+  <a href="/deleteitem/<%= item._id %>" class="btn btn-danger btn-sm mt-2" onclick="return confirm('Mark this item as sold and remove it?')">Mark as Sold 🗑️</a>
+<% } %>
 
           </div>
 
@@ -95,6 +106,11 @@
   </div>
 
 </div>
+<script>
+  document.querySelector('input[name="search"]').addEventListener('input', function() {
+    if (this.value === '') window.location.href = '/marketplace';
+  });
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

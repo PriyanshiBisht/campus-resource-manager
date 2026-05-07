@@ -104,14 +104,18 @@ app.post("/edit/:id", isLoggedIn, async (req, res) => {
 
   res.redirect("/profile");
 });
-app.get("/discussion",isLoggedIn, async (req, res) => {
-    let posts = await postModel.find().populate("user").sort({ createdAt: -1 });
-
-
-    res.render("discussion", { 
-  posts, 
-  user: req.user   
-});
+app.get("/discussion", isLoggedIn, async (req, res) => {
+  let filter = {};
+if (req.query.category) filter.category = req.query.category;
+let posts = await postModel.find(filter).populate("user").sort({ createdAt: -1 });
+let allPosts = await postModel.find();
+let counts = {
+  all: allPosts.length,
+  internship: allPosts.filter(p => p.category === "internship").length,
+  events: allPosts.filter(p => p.category === "events").length,
+  general: allPosts.filter(p => p.category === "general").length
+};
+res.render("discussion", { posts, user: req.user, selectedCategory: req.query.category || "", counts });
 });
 
 app.post('/register', async(req,res)=>{
@@ -189,12 +193,21 @@ app.post("/sell", isLoggedIn, upload.single("image"), async (req, res) => {
     res.send("Error uploading item");
   }
 });
+app.get("/deleteitem/:id", isLoggedIn, async (req, res) => {
+  await itemModel.findByIdAndDelete(req.params.id);
+  res.redirect("/marketplace");
+});
 app.get("/marketplace", isLoggedIn, async (req, res) => {
   
-  const items = await itemModel.find().populate("user").sort({ createdAt: -1 });
-  res.render("marketplace", { items });
+const search = req.query.search || "";
+const items = await itemModel.find(
+  search ? { title: { $regex: search, $options: "i" } } : {}
+).populate("user").sort({ createdAt: -1 });
+const user = await userModel.findById(req.user.userid);
+res.render("marketplace", { items, user, search });
 });
 function isLoggedIn(req, res, next) {
+  res.setHeader("Cache-Control", "no-store");
     const token = req.cookies.token;
 
     if (!token) {
