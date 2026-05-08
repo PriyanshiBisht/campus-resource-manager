@@ -75,11 +75,13 @@
         <input type="text" name="title" class="form-control"
           placeholder="e.g. Organic Chemistry Textbook - 5th Edition" required>
       </div>
-      <div class="mb-3">
-        <label class="form-label">Description</label>
-        <textarea name="description" class="form-control" rows="3"
-          placeholder="Enter details..." required></textarea>
-      </div>
+     <div class="mb-3">
+  <label class="form-label">Description</label>
+  <textarea name="description" id="itemDescription" class="form-control" rows="3"
+    placeholder="Enter details..." required></textarea>
+  <button type="button" class="btn btn-outline-secondary w-100 mt-2" onclick="generateDescription()">✨ Generate Description with AI</button>
+  <small id="descStatus" class="text-muted"></small>
+</div>
 
       <div class="mb-3">
         <label class="form-label">Price</label>
@@ -113,6 +115,21 @@
   </div>
 
 </div>
+<script>
+  async function generateDescription() {
+    const title = document.querySelector('input[name="title"]').value;
+    if (!title) return alert('Please enter a title first!');
+    document.getElementById('descStatus').textContent = 'Generating...';
+    const res = await fetch('/generate-description', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title })
+    });
+    const data = await res.json();
+    document.getElementById('itemDescription').value = data.content;
+    document.getElementById('descStatus').textContent = '✅ Done! You can edit it before submitting.';
+  }
+</script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js" integrity="sha384-YvpcrYf0tY3lHB60NNkmXc5s9fDVZLESaAA55NDzOxhy9GkcIdslK1eN7N6jIeHz" crossorigin="anonymous"></script>
 </body>
 </html>

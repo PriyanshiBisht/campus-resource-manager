@@ -2,9 +2,11 @@ const cookieParser = require('cookie-parser');
 const express = require('express');
 const app = express();
 require("dotenv").config();
+const Groq = require("groq-sdk");
 const userModel = require("./models/user");
 const postModel = require("./models/post");
 const itemModel = require("./models/item");
+const commentModel = require("./models/comment");
 const cloudinary = require("cloudinary").v2;
 
 cloudinary.config({
@@ -106,16 +108,18 @@ app.post("/edit/:id", isLoggedIn, async (req, res) => {
 });
 app.get("/discussion", isLoggedIn, async (req, res) => {
   let filter = {};
-if (req.query.category) filter.category = req.query.category;
-let posts = await postModel.find(filter).populate("user").sort({ createdAt: -1 });
-let allPosts = await postModel.find();
-let counts = {
-  all: allPosts.length,
-  internship: allPosts.filter(p => p.category === "internship").length,
-  events: allPosts.filter(p => p.category === "events").length,
-  general: allPosts.filter(p => p.category === "general").length
-};
-res.render("discussion", { posts, user: req.user, selectedCategory: req.query.category || "", counts });
+  if (req.query.category) filter.category = req.query.category;
+  let posts = await postModel.find(filter).populate("user").sort({ createdAt: -1 });
+  let allPosts = await postModel.find();
+  let counts = {
+    all: allPosts.length,
+    internship: allPosts.filter(p => p.category === "internship").length,
+    events: allPosts.filter(p => p.category === "events").length,
+    general: allPosts.filter(p => p.category === "general").length
+  };
+  let comments = await commentModel.find().populate("user").sort({ createdAt: 1 });
+  
+  res.render("discussion", { posts, user: req.user, selectedCategory: req.query.category || "", counts, comments });
 });
 
 app.post('/register', async(req,res)=>{
@@ -205,6 +209,37 @@ const items = await itemModel.find(
 ).populate("user").sort({ createdAt: -1 });
 const user = await userModel.findById(req.user.userid);
 res.render("marketplace", { items, user, search });
+});
+app.post("/generate-post", isLoggedIn, async (req, res) => {
+  const { idea } = req.body;
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const result = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: `You are a helpful assistant for a college campus app. A student has this rough idea for a discussion post: "${idea}". Write a clear, engaging, well-structured post in 3-4 sentences. Only return the post text, nothing else.` }]
+  });
+  res.json({ content: result.choices[0].message.content });
+});
+app.post("/generate-description", isLoggedIn, async (req, res) => {
+  const { title } = req.body;
+  const groq = new Groq({ apiKey: process.env.GROQ_API_KEY });
+  const result = await groq.chat.completions.create({
+    model: "llama-3.3-70b-versatile",
+    messages: [{ role: "user", content: `You are a helpful assistant for a college campus marketplace. A student is selling: "${title}". Write a short, attractive item description in 2-3 sentences for the listing. Only return the description text, nothing else.` }]
+  });
+  res.json({ content: result.choices[0].message.content });
+});
+app.post("/comment/:postId", isLoggedIn, async (req, res) => {
+  const comment = await commentModel.create({
+    content: req.body.content,
+    user: req.user.userid,
+    post: req.params.postId
+  });
+  res.redirect("/discussion");
+});
+
+app.get("/deletecomment/:id", isLoggedIn, async (req, res) => {
+  await commentModel.findByIdAndDelete(req.params.id);
+  res.redirect("/discussion");
 });
 function isLoggedIn(req, res, next) {
   res.setHeader("Cache-Control", "no-store");
